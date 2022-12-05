@@ -1,0 +1,21 @@
+@page {
+  size: A4 portrait;
+}
+
+.sheet {
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  page-break-after: always;
+  width: 210mm;
+  height: 296mm
+}
+
+/** For screen preview **/
+@media screen {
+  .sheet {
+    box-shadow: 0 .5mm 2mm rgba(0, 0, 0, .3);
+    margin: 5mm auto;
+  }
+}
