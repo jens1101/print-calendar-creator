@@ -1,21 +1,20 @@
-import React, { Fragment, useState } from "react";
-import { ConfigForm } from "./ConfigForm";
-import { Container } from "react-bootstrap";
-import "./styles.css";
 import { DateTime, Interval, Settings } from "luxon";
+import React, { Fragment, useState } from "react";
+import { Container } from "react-bootstrap";
+import { CalendarConfig } from "./CalendarConfig";
 import { CalendarPreview } from "./CalendarPreview";
+import { ConfigForm } from "./ConfigForm";
+import "./styles.css";
 
 function App() {
-  const [interval, setInterval] = useState(
-    Interval.fromDateTimes(
+  const [config, setConfig] = useState<CalendarConfig>({
+    interval: Interval.fromDateTimes(
       DateTime.now().plus({ year: 1 }).startOf("year"),
       DateTime.now().plus({ year: 1 }).endOf("year")
-    )
-  );
-
-  const [locale, setLocale] = useState(
-    Settings.defaultLocale || navigator.language
-  );
+    ),
+    locale: Settings.defaultLocale || navigator.language,
+    images: [],
+  });
 
   return (
     <Fragment>
@@ -24,19 +23,14 @@ function App() {
           <h1>Calendar Creator</h1>
 
           <ConfigForm
-            initialStartDate={interval.start}
-            initialEndDate={interval.end}
-            initialLocale={locale}
-            onSubmit={(startDate, endDate, locale) => {
-              setInterval(Interval.fromDateTimes(startDate, endDate));
-              setLocale(locale);
-            }}
+            initialConfig={config}
+            onSubmit={(config) => setConfig(config)}
             onPrint={window.print}
           />
         </Container>
       </div>
 
-      <CalendarPreview interval={interval} locale={locale} />
+      <CalendarPreview config={config} />
     </Fragment>
   );
 }

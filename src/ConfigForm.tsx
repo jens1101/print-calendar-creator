@@ -1,37 +1,28 @@
-import { DateTime, Interval } from "luxon";
+import { DateTime } from "luxon";
 import React, { useMemo, useState } from "react";
 import { Button, Card, CloseButton, Col, Form, Row } from "react-bootstrap";
+import { CalendarConfig } from "./CalendarConfig";
 import { CalendarImage } from "./CalendarImage";
 
 const MONTH_FORMAT = "yyyy-MM";
 
 export function ConfigForm(props: {
-  initialStartDate: DateTime;
-  initialEndDate: DateTime;
-  initialLocale: string;
-  onSubmit: (startDate: DateTime, endDate: DateTime, locale: string) => void;
+  initialConfig: CalendarConfig;
+  onSubmit: (config: CalendarConfig) => void;
   onPrint: () => void;
 }) {
-  const [startDate, setStartDate] = useState(props.initialStartDate);
-  const [endDate, setEndDate] = useState(props.initialEndDate);
-  const [locale, setLocale] = useState(props.initialLocale);
-  const [images, setImages] = useState<CalendarImage[]>([]);
-
-  const isIntervalValid = useMemo(
-    () => Interval.fromDateTimes(startDate, endDate).isValid,
-    [startDate, endDate]
-  );
+  const [config, setConfig] = useState<CalendarConfig>(props.initialConfig);
 
   const isLocaleValid = useMemo(() => {
     try {
-      new Intl.DateTimeFormat(locale);
+      new Intl.DateTimeFormat(config.locale);
       return true;
     } catch {
       return false;
     }
-  }, [locale]);
+  }, [config.locale]);
 
-  const isFormValid = isIntervalValid && isLocaleValid;
+  const isFormValid = config.interval.isValid && isLocaleValid;
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -40,7 +31,7 @@ export function ConfigForm(props: {
       return;
     }
 
-    props.onSubmit(startDate, endDate, locale);
+    props.onSubmit(config);
   };
 
   const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,18 +41,24 @@ export function ConfigForm(props: {
       return;
     }
 
-    setImages([
-      ...images,
-      ...Array.from(selectedFiles).map((file) => ({
-        objectUrl: URL.createObjectURL(file),
-        name: file.name,
-      })),
-    ]);
+    const additionalImages = Array.from(selectedFiles).map((file) => ({
+      objectUrl: URL.createObjectURL(file),
+      name: file.name,
+    }));
+
+    setConfig((config) => ({
+      ...config,
+      images: [...config.images, ...additionalImages],
+    }));
     event.target.value = "";
   };
 
   const onRemoveImage = (image: CalendarImage) => {
-    setImages(images.filter((currentImage) => currentImage !== image));
+    setConfig((config) => ({
+      ...config,
+      images: config.images.filter((currentImage) => currentImage !== image),
+    }));
+
     URL.revokeObjectURL(image.objectUrl);
   };
 
@@ -73,12 +70,17 @@ export function ConfigForm(props: {
             <Form.Label>Start month</Form.Label>
             <Form.Control
               type="month"
-              isInvalid={!isIntervalValid}
-              value={startDate.toFormat(MONTH_FORMAT)}
-              max={endDate.toFormat(MONTH_FORMAT)}
-              onChange={(event) => {
-                setStartDate(DateTime.fromISO(event.target.value));
-              }}
+              isInvalid={!config.interval.isValid}
+              value={config.interval.start.toFormat(MONTH_FORMAT)}
+              max={config.interval.end.toFormat(MONTH_FORMAT)}
+              onChange={(event) =>
+                setConfig((config) => ({
+                  ...config,
+                  interval: config.interval.set({
+                    start: DateTime.fromISO(event.target.value),
+                  }),
+                }))
+              }
             />
             <Form.Control.Feedback type="invalid">
               The start date cannot be after the end date
@@ -91,12 +93,17 @@ export function ConfigForm(props: {
             <Form.Label>End month</Form.Label>
             <Form.Control
               type="month"
-              isInvalid={!isIntervalValid}
-              value={endDate.toFormat(MONTH_FORMAT)}
-              min={startDate.toFormat(MONTH_FORMAT)}
-              onChange={(event) => {
-                setEndDate(DateTime.fromISO(event.target.value));
-              }}
+              isInvalid={!config.interval.isValid}
+              value={config.interval.end.toFormat(MONTH_FORMAT)}
+              min={config.interval.start.toFormat(MONTH_FORMAT)}
+              onChange={(event) =>
+                setConfig((config) => ({
+                  ...config,
+                  interval: config.interval.set({
+                    end: DateTime.fromISO(event.target.value),
+                  }),
+                }))
+              }
             />
             <Form.Control.Feedback type="invalid">
               The end date cannot be before the start date
@@ -110,10 +117,13 @@ export function ConfigForm(props: {
             <Form.Control
               type="text"
               isInvalid={!isLocaleValid}
-              value={locale}
-              onChange={(event) => {
-                setLocale(event.target.value);
-              }}
+              value={config.locale}
+              onChange={(event) =>
+                setConfig((config) => ({
+                  ...config,
+                  locale: event.target.value,
+                }))
+              }
             />
             <Form.Control.Feedback type="invalid">
               The locale string is invalid
@@ -144,11 +154,11 @@ export function ConfigForm(props: {
           </Card>
         </Col>
 
-        {images.map((image) => (
+        {config.images.map((image) => (
           <Col xs={12} sm={6} lg={4} xl={3} key={image.objectUrl}>
             <Card className={"image-preview mb-3"}>
               <Card.Img
-                className={"image-preview__image"}
+                className={"image-fill-cover"}
                 src={image.objectUrl}
                 alt={image.name}
               />

@@ -24,13 +24,12 @@
   height: 200px;
 }
 
-.image-preview__image {
+.image-fill-cover {
   height: 100%;
   width: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
-/** For screen preview **/
 @media screen {
   .sheet {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
