@@ -20,6 +20,16 @@
   aspect-ratio: 1/1;
 }
 
+.image-preview {
+  height: 200px;
+}
+
+.image-preview__image {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
 /** For screen preview **/
 @media screen {
   .sheet {

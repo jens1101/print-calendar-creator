@@ -1,6 +1,7 @@
-import { Button, Col, Form, Row } from "react-bootstrap";
-import React, { useMemo, useState } from "react";
 import { DateTime, Interval } from "luxon";
+import React, { useMemo, useState } from "react";
+import { Button, Card, CloseButton, Col, Form, Row } from "react-bootstrap";
+import { CalendarImage } from "./CalendarImage";
 
 const MONTH_FORMAT = "yyyy-MM";
 
@@ -14,6 +15,7 @@ export function ConfigForm(props: {
   const [startDate, setStartDate] = useState(props.initialStartDate);
   const [endDate, setEndDate] = useState(props.initialEndDate);
   const [locale, setLocale] = useState(props.initialLocale);
+  const [images, setImages] = useState<CalendarImage[]>([]);
 
   const isIntervalValid = useMemo(
     () => Interval.fromDateTimes(startDate, endDate).isValid,
@@ -41,6 +43,28 @@ export function ConfigForm(props: {
     props.onSubmit(startDate, endDate, locale);
   };
 
+  const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+
+    if (!selectedFiles) {
+      return;
+    }
+
+    setImages([
+      ...images,
+      ...Array.from(selectedFiles).map((file) => ({
+        objectUrl: URL.createObjectURL(file),
+        name: file.name,
+      })),
+    ]);
+    event.target.value = "";
+  };
+
+  const onRemoveImage = (image: CalendarImage) => {
+    setImages(images.filter((currentImage) => currentImage !== image));
+    URL.revokeObjectURL(image.objectUrl);
+  };
+
   return (
     <Form noValidate onSubmit={onSubmit}>
       <Row>
@@ -63,7 +87,7 @@ export function ConfigForm(props: {
         </Col>
 
         <Col>
-          <Form.Group className="mb-3" controlId="endMonth">
+          <Form.Group className={"mb-3"} controlId={"endMonth"}>
             <Form.Label>End month</Form.Label>
             <Form.Control
               type="month"
@@ -81,7 +105,7 @@ export function ConfigForm(props: {
         </Col>
 
         <Col>
-          <Form.Group className="mb-3" controlId="locale">
+          <Form.Group className={"mb-3"} controlId={"locale"}>
             <Form.Label>Locale</Form.Label>
             <Form.Control
               type="text"
@@ -99,11 +123,49 @@ export function ConfigForm(props: {
       </Row>
 
       <Row>
+        <Col xs={12} sm={6} lg={4} xl={3}>
+          <Card className={"image-preview mb-3"}>
+            <Card.Body
+              className={"d-flex align-items-center justify-content-center"}
+            >
+              <Form.Group controlId={"images"}>
+                <Form.Label className={"btn btn-outline-primary"}>
+                  Add Images
+                </Form.Label>
+                <Form.Control
+                  type={"file"}
+                  accept={"image/*"}
+                  hidden={true}
+                  multiple={true}
+                  onChange={onFileInputChange}
+                />
+              </Form.Group>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {images.map((image) => (
+          <Col xs={12} sm={6} lg={4} xl={3} key={image.objectUrl}>
+            <Card className={"image-preview mb-3"}>
+              <Card.Img
+                className={"image-preview__image"}
+                src={image.objectUrl}
+                alt={image.name}
+              />
+              <Card.ImgOverlay>
+                <CloseButton onClick={() => onRemoveImage(image)} />
+              </Card.ImgOverlay>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Row>
         <Col>
           <Button
             className={"w-100"}
-            variant="primary"
-            type="submit"
+            variant={"primary"}
+            type={"submit"}
             disabled={!isFormValid}
           >
             Update Calendar
