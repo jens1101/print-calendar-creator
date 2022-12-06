@@ -1,10 +1,9 @@
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { ConfigForm } from "./ConfigForm";
 import { Container } from "react-bootstrap";
 import "./styles.css";
 import { DateTime, Interval, Settings } from "luxon";
 import { CalendarPreview } from "./CalendarPreview";
-import { useReactToPrint } from "react-to-print";
 
 function App() {
   const [interval, setInterval] = useState(
@@ -18,34 +17,26 @@ function App() {
     Settings.defaultLocale || navigator.language
   );
 
-  const calendarRef = useRef<HTMLDivElement | null>(null);
-
-  const onPrint = useReactToPrint({
-    content: () => calendarRef.current,
-  });
-
   return (
     <Fragment>
-      <Container className={"py-3 d-print-none"}>
-        <h1>Calendar Creator</h1>
+      <div className={"py-3 d-print-none shadow position-relative"}>
+        <Container>
+          <h1>Calendar Creator</h1>
 
-        <ConfigForm
-          initialStartDate={interval.start}
-          initialEndDate={interval.end}
-          initialLocale={locale}
-          onSubmit={(startDate, endDate, locale) => {
-            setInterval(Interval.fromDateTimes(startDate, endDate));
-            setLocale(locale);
-          }}
-          onPrint={onPrint}
-        />
+          <ConfigForm
+            initialStartDate={interval.start}
+            initialEndDate={interval.end}
+            initialLocale={locale}
+            onSubmit={(startDate, endDate, locale) => {
+              setInterval(Interval.fromDateTimes(startDate, endDate));
+              setLocale(locale);
+            }}
+            onPrint={window.print}
+          />
+        </Container>
+      </div>
 
-        <CalendarPreview
-          locale={locale}
-          interval={interval}
-          ref={calendarRef}
-        />
-      </Container>
+      <CalendarPreview interval={interval} locale={locale} />
     </Fragment>
   );
 }

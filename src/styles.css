@@ -9,13 +9,26 @@
   box-sizing: border-box;
   page-break-after: always;
   width: 210mm;
-  height: 296mm
+  height: 296mm;
+}
+
+.calendar-month {
+  table-layout: fixed;
+}
+
+.calendar-month__day {
+  aspect-ratio: 1/1;
 }
 
 /** For screen preview **/
 @media screen {
   .sheet {
-    box-shadow: 0 .5mm 2mm rgba(0, 0, 0, .3);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     margin: 5mm auto;
+    padding: 10mm;
+  }
+
+  .calendar-preview {
+    background: var(--bs-gray-200);
   }
 }

@@ -80,7 +80,6 @@ export function ConfigForm(props: {
           </Form.Group>
         </Col>
 
-        {/* TODO: valid format = new Intl.DateTimeFormat */}
         <Col>
           <Form.Group className="mb-3" controlId="locale">
             <Form.Label>Locale</Form.Label>
