@@ -77,7 +77,7 @@ export function CalendarPreview(props: { config: CalendarConfig }) {
                   <td key={`week-${weekIndex}-${weekdayIndex}`}>
                     <div
                       className={`calendar-month__day ${
-                        monthInterval.contains(day) ? "" : "small text-muted"
+                        monthInterval.contains(day) ? "" : "calendar-month__day--sub"
                       }`}
                     >
                       {day.toFormat("d", { locale: props.config.locale })}

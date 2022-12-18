@@ -14,10 +14,16 @@
 
 .calendar-month {
   table-layout: fixed;
+  print-color-adjust: exact;
 }
 
 .calendar-month__day {
   aspect-ratio: 1/1;
+}
+
+.calendar-month__day--sub {
+  color: var(--bs-gray-500);
+  font-size: 0.75rem;
 }
 
 .image-preview {
